@@ -1,6 +1,7 @@
 package model.dao.impl;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,20 +26,85 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement(
+					"INSERT INTO seller\r\n" + 
+					"(Name, Email, BirthDate, BaseSalary, DepartmentId)\r\n" + 
+					"VALUES\r\n" + 
+					"(?, ?, ?, ?, ?)",
+					PreparedStatement.RETURN_GENERATED_KEYS
+					);
+			
+			st.setString(1, obj.getName());
+			st.setString(2, obj.getEmail());
+			st.setDate(3, (Date) obj.getBirthDate());
+			st.setDouble(4, obj.getBaseSalary());
+			st.setObject(5, obj.getDepartment().getId());
+			st.executeUpdate();
+			
+			int rowsAffected = st.executeUpdate();
+			if(rowsAffected > 0) {
+				rs = st.getGeneratedKeys();
+				obj.setId(rs.getInt(1));
+			}else {
+				throw new DbException("Unexpected error! No rows affected!");
+			}
+			
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
 	}
 
 	@Override
 	public void update(Seller obj) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement(
+					"UPDATE seller\r\n" + 
+					"SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ?\r\n" + 
+					"WHERE Id = ?",
+					PreparedStatement.RETURN_GENERATED_KEYS
+					);
+			
+			st.setString(1, obj.getName());
+			st.setString(2, obj.getEmail());
+			st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+			st.setDouble(4, obj.getBaseSalary());
+			st.setObject(5, obj.getDepartment().getId());
+			st.setInt(6, obj.getId());
+			st.executeUpdate();
+			
+			st.executeUpdate();	
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
 	}
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement(
+					"DELETE FROM seller\r\n" + 
+					"WHERE Id = ?"
+					);
+			
+			st.setInt(1, id);
+			st.executeUpdate();
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
