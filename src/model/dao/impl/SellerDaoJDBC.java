@@ -78,9 +78,8 @@ public class SellerDaoJDBC implements SellerDao {
 			st.setDouble(4, obj.getBaseSalary());
 			st.setObject(5, obj.getDepartment().getId());
 			st.setInt(6, obj.getId());
+		
 			st.executeUpdate();
-			
-			st.executeUpdate();	
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
